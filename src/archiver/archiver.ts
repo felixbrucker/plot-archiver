@@ -39,10 +39,10 @@ export class Archiver {
 
   private async archivePlot(plotArchival: PlotArchival) {
     const plot = plotArchival.plot;
-    let destination = this.getNextDestination(plot);
+    let destination = await this.getNextDestination(plot);
     while (!destination) {
       await sleep(5 * 1000);
-      destination = this.getNextDestination(plot);
+      destination = await this.getNextDestination(plot);
     }
     this.logger.info(`Archiving ${plot.name} to ${destination.path} ..`);
     shared.addArchival(plotArchival);
@@ -120,7 +120,16 @@ export class Archiver {
     }
   }
 
-  private getNextDestination(plot: Plot): Destination {
-    return this.destinations.find(destination => destination.activeArchival === null && destination.canFit(plot));
+  private async getNextDestination(plot: Plot): Promise<Destination> {
+    const destination = this.destinations.find(destination => destination.activeArchival === null && destination.canFit(plot));
+    if (!destination) {
+      return null;
+    }
+    await destination.updateFreeSpace();
+    if (!destination.canFit(plot)) {
+      return null;
+    }
+
+    return destination;
   }
 }
