@@ -23,12 +23,17 @@ export class Archiver {
 
   private readonly logger = ProgressAwareLogger.make({ name: 'Archiver' });
   private readonly plotsQueue: QueueObject<PlotArchival>;
+  private readonly freeSpaceRefreshInterval: NodeJS.Timer;
 
   private constructor(private readonly destinations: Destination[]) {
     this.plotsQueue = queue(this.archivePlot.bind(this), this.destinations.length || 1);
+    this.freeSpaceRefreshInterval = setInterval(async () => {
+      await Promise.all(this.destinations.map(destination => destination.updateFreeSpace()));
+    }, 60 * 60 * 1000);
   }
 
   public async shutdown() {
+    clearInterval(this.freeSpaceRefreshInterval);
     this.plotsQueue.pause();
     this.plotsQueue.kill();
   }
