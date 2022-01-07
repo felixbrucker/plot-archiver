@@ -1,0 +1,26 @@
+{
+    "name": "plot-archiver",
+    "version": "1.0.0",
+    "scripts": {
+        "start": "node ./dist/src/main.js",
+        "build": "tsc"
+    },
+    "dependencies": {
+        "async": "^3.2.2",
+        "chokidar": "^3.5.2",
+        "cli-progress": "^3.9.1",
+        "diskusage": "^1.1.3",
+        "js-yaml": "^4.1.0",
+        "moment": "^2.29.1",
+        "tslog": "^3.2.2"
+    },
+    "devDependencies": {
+        "@types/async": "^3.2.10",
+        "@types/node": "^16.11.10",
+        "ts-node": "^10.4.0",
+        "typescript": "^4.5.4"
+    },
+    "engines": {
+        "node": ">=16"
+    }
+}
