@@ -5,6 +5,7 @@ export class Config {
   public sourceDirectories: string[] = [];
   public destinationDirectories: string[] = [];
   public claimablePlotPattern: string[] = [];
+  public awaitWriteFinish: boolean = false
 
   public constructor(private readonly path: string) {}
 
@@ -14,6 +15,7 @@ export class Config {
     this.sourceDirectories = config.sourceDirectories;
     this.destinationDirectories = config.destinationDirectories;
     this.claimablePlotPattern = config.claimablePlotPattern
+    this.awaitWriteFinish = config.awaitWriteFinish
   }
 
   public async save() {
@@ -21,6 +23,7 @@ export class Config {
       sourceDirectories: this.sourceDirectories,
       destinationDirectories: this.destinationDirectories,
       claimablePlotPattern: this.claimablePlotPattern,
+      awaitWriteFinish: this.awaitWriteFinish,
     });
     await writeFile(this.path, yaml, 'utf-8');
   }

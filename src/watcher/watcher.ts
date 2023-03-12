@@ -19,15 +19,17 @@ export class Watcher {
     private readonly config: Config,
     private readonly archiver: Archiver
   ) {
+    const awaitWriteFinishConfig = {
+      pollInterval: 1000,
+      stabilityThreshold: 5 * 1000,
+    }
+
     this.watcher = this.config.sourceDirectories.map(directory => {
       return watch(directory, {
         persistent: true,
         depth: 0,
         alwaysStat: true,
-        awaitWriteFinish: {
-          pollInterval: 1000,
-          stabilityThreshold: 5 * 1000,
-        },
+        awaitWriteFinish: this.config.awaitWriteFinish ? awaitWriteFinishConfig : false,
       });
     });
     this.watcher.forEach(watcher => watcher.on('add', this.onNewFile.bind(this)));
