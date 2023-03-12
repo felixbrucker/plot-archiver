@@ -1,19 +1,27 @@
 import { stat } from 'fs/promises';
 import { basename } from 'path';
+import {Config} from '../config/config'
 
 export class Plot {
-  public static async make(path: string): Promise<Plot> {
-    const { size } = await stat(path);
+  public static async make(path: string, config: Config): Promise<Plot> {
+    const { size, birthtime } = await stat(path);
     const sizeInGib = size / (1024 ** 3);
 
-    return new Plot(path, sizeInGib);
+    return new Plot(path, sizeInGib, birthtime, config);
   }
+
+  public constructor(
+    public readonly path: string,
+    public readonly sizeInGib: number,
+    public readonly createdAt: Date,
+    private readonly config: Config,
+  ) {}
 
   public get name(): string {
     return basename(this.path);
   }
 
-  get displayName(): string {
+  public get displayName(): string {
     const parts = this.name.split('.');
     const fileExtension = parts.pop();
     const fileNameWithoutExtension = parts.join('.');
@@ -22,8 +30,7 @@ export class Plot {
     return `${truncatedFileNameWithoutExtension}.${fileExtension}`;
   }
 
-  private constructor(
-    public readonly path: string,
-    public readonly sizeInGib: number,
-  ) {}
+  public get isClaimable(): Boolean {
+    return this.config.claimablePlotPattern.some(pattern => !!this.path.match(new RegExp(pattern)));
+  }
 }

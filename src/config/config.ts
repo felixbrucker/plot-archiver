@@ -4,6 +4,7 @@ import {load, dump} from 'js-yaml';
 export class Config {
   public sourceDirectories: string[] = [];
   public destinationDirectories: string[] = [];
+  public claimablePlotPattern: string[] = [];
 
   public constructor(private readonly path: string) {}
 
@@ -12,12 +13,14 @@ export class Config {
     const config = load(yaml);
     this.sourceDirectories = config.sourceDirectories;
     this.destinationDirectories = config.destinationDirectories;
+    this.claimablePlotPattern = config.claimablePlotPattern
   }
 
   public async save() {
     const yaml = dump({
       sourceDirectories: this.sourceDirectories,
       destinationDirectories: this.destinationDirectories,
+      claimablePlotPattern: this.claimablePlotPattern,
     });
     await writeFile(this.path, yaml, 'utf-8');
   }

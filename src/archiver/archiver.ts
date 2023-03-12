@@ -11,12 +11,13 @@ import {PlotArchival} from './plot-archival';
 import {sleep} from '../util/sleep';
 import {ProgressAwareLogger} from '../logging/logger';
 import {shared} from '../ui/progress-bar';
+import {Config} from '../config/config'
 
 const mibWrittenSlidingWindowInSeconds = 15;
 
 export class Archiver {
-  public static async make(destinationDirectories: string[]): Promise<Archiver> {
-    const destinations = await Promise.all(destinationDirectories.map(destinationDirectory => Destination.make(destinationDirectory)));
+  public static async make(config: Config): Promise<Archiver> {
+    const destinations = await Promise.all(config.destinationDirectories.map(destinationDirectory => Destination.make(destinationDirectory, config)));
 
     return new Archiver(destinations);
   }
@@ -45,8 +46,8 @@ export class Archiver {
   private async archivePlot(plotArchival: PlotArchival) {
     const plot = plotArchival.plot;
     let destination = await this.getNextDestination(plot);
-    while (!destination) {
-      await sleep(5 * 1000);
+    while (destination === undefined) {
+      await sleep(10 * 1000);
       destination = await this.getNextDestination(plot);
     }
     this.logger.info(`Archiving ${plot.name} to ${destination.path} ..`);
@@ -126,15 +127,16 @@ export class Archiver {
   }
 
   private async getNextDestination(plot: Plot): Promise<Destination> {
-    const destination = this.destinations.find(destination => destination.activeArchival === null && destination.canFit(plot));
-    if (!destination) {
-      return null;
+    const destinationsNotCurrentlyArchivingTo = this.destinations.filter(destination => destination.activeArchival === null)
+    let destination = destinationsNotCurrentlyArchivingTo.find(destination => destination.canFit(plot))
+    if (destination !== undefined) {
+      return destination
     }
-    await destination.updateFreeSpace();
-    if (!destination.canFit(plot)) {
-      return null;
-    }
+    destination = destinationsNotCurrentlyArchivingTo.find(destination => destination.canFitWithClaimablePlots(plot))
+    if (destination !== undefined) {
+      await destination.claimPlotsForPlot(plot)
 
-    return destination;
+      return destination
+    }
   }
 }

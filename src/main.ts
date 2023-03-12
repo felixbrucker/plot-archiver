@@ -21,8 +21,8 @@ process.on('uncaughtException', (err: Error) => {
     await config.save();
   }
 
-  const archiver = await Archiver.make(config.destinationDirectories);
-  const watcher = new Watcher(config.sourceDirectories, archiver);
+  const archiver = await Archiver.make(config);
+  const watcher = new Watcher(config, archiver);
 
   process.on('SIGINT', async () => {
     await watcher.shutdown();
