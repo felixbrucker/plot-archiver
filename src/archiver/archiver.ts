@@ -66,8 +66,8 @@ export class Archiver {
     destination.activeArchival = plotArchival;
     const destinationFilePath = join(destination.path, plot.name);
     const destinationTempFilePath = `${destinationFilePath}.temp`;
-    const readStream = createReadStream(plot.path, { highWaterMark: 1024 ** 2 });
-    const writeStream = createWriteStream(destinationTempFilePath, { highWaterMark: 1024 ** 2 });
+    const readStream = createReadStream(plot.path, { highWaterMark: 64 * (1024 ** 2) });
+    const writeStream = createWriteStream(destinationTempFilePath, { highWaterMark: 64 * (1024 ** 2) });
 
     let gibWrittenCollection = [];
     const progressCalcInterval = setInterval(() => {
