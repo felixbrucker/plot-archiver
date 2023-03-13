@@ -7,6 +7,7 @@ export class Config {
   public claimablePlotPattern: string[] = [];
   public awaitWriteFinish: boolean = false
   public maxActiveArchivals?: number
+  public maxActiveArchivalsFromSameSource?: number
 
   public constructor(private readonly path: string) {}
 
@@ -18,6 +19,7 @@ export class Config {
     this.claimablePlotPattern = config.claimablePlotPattern
     this.awaitWriteFinish = config.awaitWriteFinish
     this.maxActiveArchivals = config.maxActiveArchivals
+    this.maxActiveArchivalsFromSameSource = config.maxActiveArchivalsFromSameSource
   }
 
   public async save() {
@@ -27,6 +29,7 @@ export class Config {
       claimablePlotPattern: this.claimablePlotPattern,
       awaitWriteFinish: this.awaitWriteFinish,
       maxActiveArchivals: this.maxActiveArchivals,
+      maxActiveArchivalsFromSameSource: this.maxActiveArchivalsFromSameSource,
     });
     await writeFile(this.path, yaml, 'utf-8');
   }

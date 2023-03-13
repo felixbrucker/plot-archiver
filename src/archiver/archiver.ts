@@ -130,8 +130,12 @@ export class Archiver {
   }
 
   private async getNextDestination(plot: Plot): Promise<Destination> {
-    const currentlyActiveArchivals = this.destinations.filter(destination => destination.activeArchival !== null).length
-    if (this.config.maxActiveArchivals !== undefined && currentlyActiveArchivals >= this.config.maxActiveArchivals) {
+    const activeArchivals = this.destinations.map(destination => destination.activeArchival).filter(activeArchival => activeArchival !== null)
+    if (this.config.maxActiveArchivals !== undefined && activeArchivals.length >= this.config.maxActiveArchivals) {
+      return
+    }
+    const activeArchivalsFromSameSource = activeArchivals.filter(activeArchival => activeArchival.plot.sourceDirectory === plot.sourceDirectory)
+    if (this.config.maxActiveArchivalsFromSameSource !== undefined && activeArchivalsFromSameSource.length >= this.config.maxActiveArchivalsFromSameSource) {
       return
     }
     const destinationsNotCurrentlyArchivingTo = this.destinations.filter(destination => destination.activeArchival === null)

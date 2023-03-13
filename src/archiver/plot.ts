@@ -1,5 +1,5 @@
 import { stat } from 'fs/promises';
-import { basename } from 'path';
+import {basename, dirname} from 'path'
 import {Config} from '../config/config'
 
 export class Plot {
@@ -16,6 +16,10 @@ export class Plot {
     public readonly createdAt: Date,
     private readonly config: Config,
   ) {}
+
+  public get sourceDirectory(): string {
+    return dirname(this.path)
+  }
 
   public get name(): string {
     return basename(this.path);
