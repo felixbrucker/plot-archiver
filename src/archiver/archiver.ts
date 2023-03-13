@@ -49,9 +49,11 @@ export class Archiver {
   private async archivePlot(plotArchival: PlotArchival) {
     const plot = plotArchival.plot;
     let destination = await this.getNextDestination(plot);
-    while (destination === undefined) {
-      await sleep(10 * 1000);
-      destination = await this.getNextDestination(plot);
+    if (destination === undefined) {
+      await sleep(10 * 1000)
+      this.plotsQueue.push(plotArchival)
+
+      return
     }
     this.logger.info(`Archiving ${plot.name} to ${destination.path} ..`);
     shared.addArchival(plotArchival);
