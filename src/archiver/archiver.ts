@@ -50,7 +50,7 @@ export class Archiver {
     const plot = plotArchival.plot;
     let destination = await this.getNextDestination(plot);
     if (destination === undefined) {
-      await sleep(10 * 1000)
+      await sleep(1000)
       this.plotsQueue.push(plotArchival)
 
       return
