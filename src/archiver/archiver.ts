@@ -19,14 +19,17 @@ export class Archiver {
   public static async make(config: Config): Promise<Archiver> {
     const destinations = await Promise.all(config.destinationDirectories.map(destinationDirectory => Destination.make(destinationDirectory, config)));
 
-    return new Archiver(destinations);
+    return new Archiver(destinations, config);
   }
 
   private readonly logger = ProgressAwareLogger.make({ name: 'Archiver' });
   private readonly plotsQueue: QueueObject<PlotArchival>;
   private readonly freeSpaceRefreshInterval: NodeJS.Timer;
 
-  private constructor(private readonly destinations: Destination[]) {
+  private constructor(
+    private readonly destinations: Destination[],
+    private readonly config: Config,
+  ) {
     this.plotsQueue = queue(this.archivePlot.bind(this), this.destinations.length || 1);
     this.freeSpaceRefreshInterval = setInterval(async () => {
       await Promise.all(this.destinations.map(destination => destination.updateFreeSpace()));
@@ -127,6 +130,10 @@ export class Archiver {
   }
 
   private async getNextDestination(plot: Plot): Promise<Destination> {
+    const currentlyActiveArchivals = this.destinations.filter(destination => destination.activeArchival !== null).length
+    if (this.config.maxActiveArchivals !== undefined && currentlyActiveArchivals >= this.config.maxActiveArchivals) {
+      return
+    }
     const destinationsNotCurrentlyArchivingTo = this.destinations.filter(destination => destination.activeArchival === null)
     let destination = destinationsNotCurrentlyArchivingTo.find(destination => destination.canFit(plot))
     if (destination !== undefined) {
